@@ -51,26 +51,31 @@ function processRankingContestants(contestantsDetails) {
 }
 
 function showTemplateResults(contestantsDetails) {
-	let destructuringTopThreeContestants = [{name, score}, {name, score}, {name, score}] = processRankingContestants(contestantsDetails);
-	var result = `The winners are:\n`;
-	var topThree = 0;
-	
-	while(topThree < 3) {
+	if(contestantsDetails.length > 3) {
+		let destructuringTopThreeContestants = [{name, score}, {name, score}, {name, score}] = processRankingContestants(contestantsDetails);
+		var result = `The winners are:\n`;
+		var topThree = 0;
 		
-		var contestant = destructuringTopThreeContestants[topThree];
-		
-		if(topThree === 0) {
-			result += `\n(1st) ${contestant.name} scored ${contestant.score} out of 10`;
-		} else if (topThree === 1) {
-			result += `\n(2nd) ${contestant.name} scored ${contestant.score} out of 10`;
-		} else {
-			result += `\n(3rd) ${contestant.name} scored ${contestant.score} out of 10`;
+		while(topThree < 3) {
+			
+			var contestant = destructuringTopThreeContestants[topThree];
+			
+			if(topThree === 0) {
+				result += `\n(1st) ${contestant.name} scored ${contestant.score} out of 10`;
+			} else if (topThree === 1) {
+				result += `\n(2nd) ${contestant.name} scored ${contestant.score} out of 10`;
+			} else {
+				result += `\n(3rd) ${contestant.name} scored ${contestant.score} out of 10`;
+			}
+			
+			topThree++;
 		}
 		
-		topThree++;
+		return console.info(result);
+	} else {
+		return console.info(`Error: The minimum number of participant should be at least 3 to proceed.`);
 	}
 	
-	return console.info(result);
 }
 
 function rankingTool(contestantsDetails) {
