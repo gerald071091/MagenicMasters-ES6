@@ -20,17 +20,15 @@ function wordCounter(result) {
 }
 
 
-function showTemplateResult(dataString, wordCount, vowelCount, consonantCount) {
-	var result = `Input: ${dataString}`;
-	
-	result += `\nNumber of word(s) found: ${wordCount}`;
+function showTemplateResult(dataString, dummyData, wordCount, vowelCount, consonantCount) {
+	var result = `${dataString[0]}${dummyData}${dataString[1]}${wordCount}`;
 	
 	if(wordCount > 0) {
-		result += `\nNumber of vowel(s) found: ${vowelCount}`;
+		result += `${dataString[2]}${vowelCount}`;
 	}
 	
 	if(consonantCount > 0) {
-		result += `\nNumber of consonant(s) found: ${consonantCount}`;
+		result += `${dataString[3]}${consonantCount}`;
 	}
 	
 	return console.info(result);
@@ -50,7 +48,7 @@ function wordProcessor(dataString) {
 	var vowelCount = vowelCounter(dataString);
 	var consonantCount = consonantCounter(dataString);
 	
-	return showTemplateResult(dataString, wordCount, vowelCount, consonantCount);
+	return showTemplateResult `Input: ${dummyData}\n \nNumber of word(s) found: ${wordCount} \nNumber of vowel(s) found: ${vowelCount} \nNumber of consonant(s) found: ${consonantCount}`; 
 }
 
 // execute
