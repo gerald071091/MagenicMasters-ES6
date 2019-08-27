@@ -2,8 +2,7 @@ class PokerGame {
 	
 	constructor() {
 		this.cardDeck = this.createCardDeck();
-		this.royalFlashCardCombination = this.cardDeck[3].slice(-5);
-		this.cardCombination = { result: ["High card"] };
+		this.cardCombination = { result : ["High card"] };
 	}
 
 	createCardDeck() {
@@ -18,7 +17,7 @@ class PokerGame {
 				cardDeckPerSuit.push(card);
 			});
 			
-			cardDeck.push(cardDeckPerSuit);
+			cardDeck[suit] = cardDeckPerSuit;
 			cardDeckPerSuit = [];
 		});
 		
@@ -26,14 +25,47 @@ class PokerGame {
 	}
 
 	getCardCombination(cardsOnHand) {
-		this.pairComparator(cardsOnHand);
-		this.flushOrStraightComparator(cardsOnHand);
-		
-		return this.cardCombination;
+		let isValid = this.isCardsOnHandValid(cardsOnHand.hand);
+
+		if(isValid) {
+			this.pairComparator(cardsOnHand.hand);
+			this.flushOrStraightComparator(cardsOnHand.hand);
+			
+			return this.cardCombination;
+		} else {
+			return { result: ["Some cards are not valid OR duplicate cards OR did not meet the required input (should provide 5 cards)"] };
+		}
+	}
+
+	isCardsOnHandValid(cardsOnHand) {
+		let hasInvalidCard = [];
+
+		if(cardsOnHand.length > 5 || cardsOnHand.length < 5) {
+			return false;
+		}
+
+		if(cardsOnHand.filter((item, index) => cardsOnHand.indexOf(item) != index).length > 0) {
+			return false;
+		}
+
+		cardsOnHand.forEach((card) => {
+			card = card.toUpperCase();
+
+			let cardOnHandSuit = card[card.length - 1];
+			let cardDeckSuitsToCheck = this.cardDeck[cardOnHandSuit];
+
+			if(cardDeckSuitsToCheck === undefined) {
+				hasInvalidCard.push("NotAvailable");
+			} else if(!cardDeckSuitsToCheck.includes(card)) {
+				hasInvalidCard.push(card);
+			}
+		});
+
+		return hasInvalidCard.length > 0 ? false : true;
 	}
 
 	flushOrStraightComparator(cardOnHand) {
-		if(this.isCombinationalCardOnHand(cardOnHand, this.royalFlashCardCombination)) {
+		if(this.isOnTheSameSuit(cardOnHand) && this.isInSequence(cardOnHand) && this.hasAceHighCard(cardOnHand)) {
 			// check if card on hand is royal flush
 			this.cardCombination.result.push("Royal Flush");
 		} else if(this.isOnTheSameSuit(cardOnHand) && this.isInSequence(cardOnHand)) {
@@ -54,7 +86,7 @@ class PokerGame {
 		let hasThreeCardsOnSameRank = false;
 		let hasTwoCardsOnSameRank = false;
 		
-		let rankCardsValue = cardOnHand.map((card) => { return card.replace(card.slice(-1), ""); });
+		let rankCardsValue = cardOnHand.map((card) => { card = card.toUpperCase(); return card.replace(card.slice(-1), ""); });
 		
 		rankCardsValue.forEach((rankCard) => {
 			if(isNaN(rankCard)) {
@@ -98,7 +130,9 @@ class PokerGame {
 	isOnTheSameSuit(cardOnHand) { 
 		let cardOnHandSuits = [];
 		cardOnHand.forEach((card) => {
-			cardOnHandSuits.push(card.charAt(1));	
+			card = card.toUpperCase();
+
+			cardOnHandSuits.push(card[card.length - 1]);	
 		});
 		
 		let result = cardOnHandSuits.filter((value, index) => { return cardOnHandSuits.indexOf(value) === index; }); 
@@ -108,17 +142,29 @@ class PokerGame {
 	isInSequence(cardOnHand) { 
 		let cardOnHandValues = [];
 		cardOnHand.forEach((card) => {
-			let cardValue = card.charAt(0);
+			let cardValue = "";
+			card = card.toUpperCase();
+
+			if(card.includes("0")) {
+				cardValue = card.slice(0, 2);
+			} else {
+				cardValue = card.slice(0, 1);
+			}
+
 			if(isNaN(cardValue)) {
 				let equivalentValue = this.convertHighRankToValue(cardValue);
 				cardOnHandValues.push(equivalentValue);
+			} else {
+				cardOnHandValues.push(cardValue);	
 			}
-			
-			cardOnHandValues.push(cardValue);	
 		});
+
+		let customSort = function(a, b) {
+			return (Number(a) - Number(b));
+		}
 		
-		let sortedValues = cardOnHandValues.concat().sort();
-		return sortedValues.every((value, i) => !Number.isNaN(value) && (i === 0 || (sortedValues[i - 1] < value && (value - sortedValues[i - 1] === 1)))); 
+		let sortedValues = cardOnHandValues.sort(customSort);
+		return sortedValues.every((value, i) => !Number.isNaN(value) && (i === 0 || (Number(sortedValues[i - 1]) < Number(value) && (Number(value) - Number(sortedValues[i - 1]) === 1)))); 
 	}
 
 	convertHighRankToValue(value) {
@@ -136,21 +182,12 @@ class PokerGame {
 		}
 	}
 
-	isCombinationalCardOnHand(cardOnHand, combination) {
-		if (!Array.isArray(cardOnHand) || ! Array.isArray(combination) || cardOnHand.length !== combination.length) {
+	hasAceHighCard(cardOnHand) {
+		if(cardOnHand.some((card) => { card = card.toUpperCase(); return card.includes("A"); })) {
+			return true;
+		} else {
 			return false;
 		}
-		
-		let inputSort = cardOnHand.concat().sort();
-		let combinationSort = combination.concat().sort();
-		
-		for(let index = 0; index < inputSort.length; index++) {
-			if(inputSort[index] !== combinationSort[index]) {
-				return false;
-			}
-		}
-		 
-		return true;
 	}
 }
 
